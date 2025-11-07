@@ -1,56 +1,75 @@
-'use client';
+'use client'; // Must be first line to enable hooks on this page
+
 import React, { useState } from 'react';
 import CategorySelector from './CategorySelector.jsx';
 import ProductIdentifier from './ProductIdentifier.jsx';
 import { fetchDataFromApi } from '../../utils/api';
 
 const ReviewForm = () => {
- 
   const [formData, setFormData] = useState({
-
     selectedCategoryId: null,
-
     isNewSubmission: false,
     productId: null,
-    newProductDetails: {}, review_text: '',
-
+    newProductDetails: {},
+    review_text: '',
     submissionStatus: 'idle',
     submissionMessage: '',
-  }); const handleCategorySelect = (category) => {
-    setFormData(prev => ({
-      ...prev, selectedCategoryId: category.id, productId: null, newProductDetails: {}, }));
+  });
+
+  // --- Handlers for child components ---
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedCategoryId: category.id,
+      productId: null,
+      newProductDetails: {},
+    }));
   };
 
   const handleProductChange = ({ productId, newProductDetails, isNew }) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       isNewSubmission: isNew,
       productId: isNew ? null : productId,
       newProductDetails: isNew ? newProductDetails : {},
     }));
-  };  const handleTextChange = (e) => {
-    setFormData(prev => ({
+  };
+
+  const handleTextChange = (e) => {
+    setFormData((prev) => ({
       ...prev,
       review_text: e.target.value,
     }));
-  };  const handleSubmit = async (e) => {
+  };
+
+  // --- Form submission ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       submissionStatus: 'submitting',
       submissionMessage: 'Sending review for AI check...',
-    }));    if (!formData.selectedCategoryId || (!formData.productId && !formData.newProductDetails.model_name)) {
-      setFormData(prev => ({
+    }));
+
+    // Validation
+    if (!formData.selectedCategoryId || (!formData.productId && !formData.newProductDetails.model_name)) {
+      setFormData((prev) => ({
         ...prev,
         submissionStatus: 'error',
         submissionMessage: 'Please select a category and identify the product.',
-      }));      return;
+      }));
+      return;
     }
 
+    const USER_ID = 1; // Replace with actual authenticated user ID
+    const reviewData = {
+      review_text: formData.review_text,
+      user: USER_ID,
+    };
 
-    const USER_ID = 1;
-    const reviewData = { review_text: formData.review_text, user: USER_ID, }; let finalPayload = {};
-   if (formData.isNewSubmission) {
+    let finalPayload = {};
+    if (formData.isNewSubmission) {
       finalPayload = {
         ...reviewData,
         product_submission: {
@@ -58,20 +77,15 @@ const ReviewForm = () => {
           category: formData.selectedCategoryId,
         },
       };
-
-
-
     } else {
-
       finalPayload = {
         ...reviewData,
         product: formData.productId,
       };
     }
 
-
+    // API call
     try {
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,21 +95,20 @@ const ReviewForm = () => {
       const result = await response.json();
 
       if (response.ok) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           submissionStatus: 'success',
           submissionMessage: result.message || 'Review submitted successfully!',
         }));
       } else {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           submissionStatus: 'error',
           submissionMessage: result.error?.message || 'Submission failed. Check your data.',
         }));
       }
-
     } catch (error) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         submissionStatus: 'error',
         submissionMessage: 'Network error or server unavailable.',
@@ -103,20 +116,27 @@ const ReviewForm = () => {
     }
   };
 
-
-
+  // --- Rendering ---
   const isCategorySelected = !!formData.selectedCategoryId;
   const isProductIdentified = formData.productId || formData.newProductDetails.model_name;
 
   return (
     <form onSubmit={handleSubmit} className="review-form">
       <h2>Submit a Review</h2>
-      <CategorySelector onSelectCategory={handleCategorySelect} /> {isCategorySelected && (
+
+      {/* Step 1: Category Selection */}
+      <CategorySelector onSelectCategory={handleCategorySelect} />
+
+      {/* Step 2: Product Identification */}
+      {isCategorySelected && (
         <ProductIdentifier
           categoryId={formData.selectedCategoryId}
           onProductChange={handleProductChange}
         />
-      )}{isProductIdentified && (
+      )}
+
+      {/* Step 3: Review Text Input */}
+      {isProductIdentified && (
         <div className="review-content-step">
           <h3>3. Write Your Review</h3>
           <textarea
@@ -129,7 +149,7 @@ const ReviewForm = () => {
         </div>
       )}
 
-
+      {/* Final Submission Button and Status */}
       {isProductIdentified && (
         <>
           <button type="submit" disabled={formData.submissionStatus === 'submitting'}>
