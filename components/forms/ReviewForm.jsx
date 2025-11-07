@@ -3,9 +3,7 @@
 import React, { useState } from 'react';
 import CategorySelector from './CategorySelector.jsx'; // Step 1
 import ProductIdentifier from './ProductIdentifier.jsx'; // Step 2
-// NOTE: DynamicRater component is MISSING, so we comment out the import:
-// import DynamicRater from './DynamicRater.jsx'; // Step 3
-import { fetchDataFromApi } from '../../../utils/api'; // CORRECTED PATH (3 dots up)
+import { fetchDataFromApi } from '../../utils/api';
 
 const ReviewForm = () => {
   // Master state to manage all parts of the submission
