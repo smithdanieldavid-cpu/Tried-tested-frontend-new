@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import CategorySelector from './CategorySelector'; // Step 1
 import ProductIdentifier from './ProductIdentifier'; // Step 2
 import DynamicRater from './DynamicRater'; // Step 3
-import { fetchDataFromApi } from '../tried-tested-frontend/utils/api'; 
+import { fetchDataFromApi } from '../../utils/api';
 
 const ReviewForm = () => {
   // Master state to manage all parts of the submission
