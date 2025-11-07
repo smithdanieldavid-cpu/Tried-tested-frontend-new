@@ -3,29 +3,29 @@
 import React, { useState } from 'react';
 import CategorySelector from './CategorySelector.jsx'; // Step 1
 import ProductIdentifier from './ProductIdentifier.jsx'; // Step 2
-import DynamicRater from './DynamicRater.jsx'; // Step 3
-import { fetchDataFromApi } from '../../utils/api';
+// NOTE: DynamicRater component is MISSING, so we comment out the import:
+// import DynamicRater from './DynamicRater.jsx'; // Step 3
+import { fetchDataFromApi } from '../../../utils/api'; // CORRECTED PATH (3 dots up)
 
 const ReviewForm = () => {
   // Master state to manage all parts of the submission
   const [formData, setFormData] = useState({
     // 1. Category Data
-    selectedCategoryId: null, // Sub-category ID (for metrics and product links)
+    selectedCategoryId: null, 
     
     // 2. Product Identification Data
     isNewSubmission: false, 
     productId: null,        
-    newProductDetails: {},  // { model_name, brand_name_text }
+    newProductDetails: {}, 
     
-    // 3. Rating Data
-    ratings: {}, 
+    // 3. Rating Data (Removed, since DynamicRater is missing)
+    // ratings: {}, 
     
     // 4. Content Data
     review_text: '',
-    // photo_ids: [], 
     
     // UX/Status
-    submissionStatus: 'idle', // 'submitting', 'success', 'error'
+    submissionStatus: 'idle', 
     submissionMessage: '',
   });
 
@@ -50,12 +50,15 @@ const ReviewForm = () => {
     }));
   };
 
+  // NOTE: handleRatingsChange is removed since DynamicRater is missing
+  /*
   const handleRatingsChange = (newRatings) => {
     setFormData(prev => ({
       ...prev,
       ratings: newRatings,
     }));
   };
+  */
 
   const handleTextChange = (e) => {
     setFormData(prev => ({
@@ -70,7 +73,7 @@ const ReviewForm = () => {
     e.preventDefault();
     setFormData(prev => ({ ...prev, submissionStatus: 'submitting', submissionMessage: 'Sending review for AI check...' }));
 
-    // Basic Validation Check (Can be more thorough)
+    // Basic Validation Check
     if (!formData.selectedCategoryId || (!formData.productId && !formData.newProductDetails.model_name)) {
       setFormData(prev => ({ ...prev, submissionStatus: 'error', submissionMessage: 'Please select a category and identify the product.' }));
       return;
@@ -79,18 +82,18 @@ const ReviewForm = () => {
     // NOTE: Replace '1' with actual authenticated User ID
     const USER_ID = 1;
 
-    // 1. Assemble the core Review Data
+    // 1. Assemble the core Review Data (ratings removed as they aren't collected)
     const reviewData = {
       review_text: formData.review_text,
-      ratings: JSON.stringify(formData.ratings), // Must be stringified JSON for the Strapi field
+      // ratings: JSON.stringify(formData.ratings), 
       user: USER_ID,
     };
     
-    // 2. Determine and Prepare Final Payload (This determines which relation is used)
+    // 2. Determine and Prepare Final Payload 
     let finalPayload = {};
 
     if (formData.isNewSubmission) {
-      // PATH B: New Product Submission (Links Review to ProductSubmission)
+      // PATH B: New Product Submission 
       const productSubmissionData = {
         ...formData.newProductDetails, // model_name, brand_name_text
         category: formData.selectedCategoryId, 
@@ -98,12 +101,11 @@ const ReviewForm = () => {
       
       finalPayload = {
         ...reviewData,
-        // The custom backend controller will intercept this and create the ProductSubmission entry
         product_submission: productSubmissionData,
       };
 
     } else {
-      // PATH A: Existing Product Review (Links Review to Product)
+      // PATH A: Existing Product Review 
       finalPayload = {
         ...reviewData,
         product: formData.productId, 
@@ -112,7 +114,7 @@ const ReviewForm = () => {
     
     // --- 3. Final API Call ---
     try {
-      // We are POSTing to the Strapi Review endpoint, which triggers the AI moderation in the backend
+      // Note: fetchDataFromApi is not used here, standard fetch is fine.
       const response = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,14 +124,12 @@ const ReviewForm = () => {
       const result = await response.json();
       
       if (response.ok) {
-        // Uses the custom success/flagged message from your Strapi controller
         setFormData(prev => ({ 
             ...prev, 
             submissionStatus: 'success', 
             submissionMessage: result.message 
         }));
       } else {
-        // Handle validation errors or failed requests
         setFormData(prev => ({ 
             ...prev, 
             submissionStatus: 'error', 
@@ -162,18 +162,19 @@ const ReviewForm = () => {
         />
       )}
 
-      {/* Step 3: Dynamic Ratings (Requires Product Identification) */}
-      {isProductIdentified && (
+      {/* Step 3: Dynamic Ratings (REMOVED) */}
+      {/* {isProductIdentified && (
         <DynamicRater 
           categoryId={formData.selectedCategoryId} 
           onRatingsChange={handleRatingsChange} 
         />
       )}
+      */}
 
       {/* Step 4: Review Text Input */}
       {isProductIdentified && (
         <div className="review-content-step">
-          <h3>4. Write Your Review</h3>
+          <h3>3. Write Your Review</h3> {/* Step number changed */}
           <textarea
             value={formData.review_text}
             onChange={handleTextChange}
