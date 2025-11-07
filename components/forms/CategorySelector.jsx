@@ -1,7 +1,7 @@
 // tried-tested-frontend/components/forms/CategorySelector.jsx
 
 import React, { useState, useEffect } from 'react';
-import { fetchDataFromApi } from '../tried-tested-frontend/utils/api';
+import { fetchDataFromApi } from '../../../utils/api';
 
 const CategorySelector = ({ onSelectCategory }) => {
   const [categories, setCategories] = useState([]);
