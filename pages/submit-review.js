@@ -1,6 +1,6 @@
 // tried-tested-frontend/pages/submit-review.js
 
-import ReviewForm from '../Components/Forms/ReviewForm.jsx';
+import ReviewForm from '../Components/forms/ReviewForm.jsx';
 import Head from 'next/head';
 
 // This is the component that Next.js automatically renders as a page
