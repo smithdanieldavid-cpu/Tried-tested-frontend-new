@@ -1,9 +1,9 @@
 // tried-tested-frontend/components/forms/ReviewForm.jsx
 
 import React, { useState } from 'react';
-import CategorySelector from './CategorySelector'; // Step 1
-import ProductIdentifier from './ProductIdentifier'; // Step 2
-import DynamicRater from './DynamicRater'; // Step 3
+import CategorySelector from './CategorySelector.jsx'; // Step 1
+import ProductIdentifier from './ProductIdentifier.jsx'; // Step 2
+import DynamicRater from './DynamicRater.jsx'; // Step 3
 import { fetchDataFromApi } from '../../utils/api';
 
 const ReviewForm = () => {
